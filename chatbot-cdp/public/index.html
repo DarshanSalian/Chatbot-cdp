@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CDP Chatbot</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 20px;
+        }
+        #chatBox {
+            max-width: 600px;
+            margin: auto;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .userMessage {
+            background-color: #dcdcdc;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+        .botMessage {
+            background-color: #e0f7fa;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+        .loading {
+            color: #888;
+            font-style: italic;
+        }
+        .error {
+            color: #ff0000;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<h1>CDP Support Chatbot</h1>
+<div id="chatBox">
+    <div id="messages"></div>
+    <input type="text" id="userInput" placeholder="Ask a 'how-to' question..." />
+    <button onclick="sendMessage()">Send</button>
+</div>
+
+<script>
+    async function sendMessage() {
+        const userInput = document.getElementById('userInput').value.trim();
+        const messagesDiv = document.getElementById('messages');
+        
+        // Check for empty input
+        if (!userInput) {
+            alert('Please enter a question.');
+            return;
+        }
+        
+        // Display the user's message
+        messagesDiv.innerHTML += `<div class="userMessage">${userInput}</div>`;
+        
+        // Show loading indicator
+        messagesDiv.innerHTML += `<div class="loading">Loading...</div>`;
+        
+        try {
+            // Send the user's message to the backend API
+            const response = await fetch('/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ question: userInput })
+            });
+            
+            const data = await response.json();
+            
+            // Remove loading indicator
+            messagesDiv.querySelector('.loading').remove();
+            
+            // Display the bot's response
+            messagesDiv.innerHTML += `<div class="botMessage">${data.answer}</div>`;
+        } catch (error) {
+            // Remove loading indicator
+            messagesDiv.querySelector('.loading').remove();
+            
+            // Display error message
+            messagesDiv.innerHTML += `<div class="error">Error: Could not get a response from the bot.</div>`;
+        }
+        
+        // Clear the input field
+        document.getElementById('userInput').value = '';
+    }
+</script>
+
+</body>
+</html>
